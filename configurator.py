@@ -364,6 +364,7 @@ def get_default_config():
         'purity': '100',
         'sorting': 'random',
         'order': 'desc',
+        'resolutions': '1920x1080',
     }
     config['Task'] = {
         'seconds': '600',
@@ -379,12 +380,11 @@ def get_default_config():
         'hk_locate': 'control+alt+up',
     }
     config['App'] = {
-        'version': '1.2021.06.25',
+        'version': '1.2021.07.07',
         'author': 'Myles Yang',
         'github': 'https://github.com/snwjas/RandomDesktopBackground',
         'gitee': 'https://gitee.com/snwjas/random-desktop-background',
     }
-    update_config_file(config)
     return config
 
 

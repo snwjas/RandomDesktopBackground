@@ -6,10 +6,11 @@
 @author Myles Yang
 """
 
+# 程序名称
 app_name = '随机桌面背景'
 
 # 对话框标题
-dialog_title = '来自\"随机桌面背景\"的提示'
+dialog_title = '来自\"{}\"的提示'.format(app_name)
 
 # 桌面背景保存目录
 bg_srcpath = 'run/wallpapers'

@@ -6,6 +6,7 @@
 """
 
 import sys
+import platform
 
 import app_menu
 import args_definition
@@ -13,15 +14,18 @@ import mylogger
 import utils
 from app_run_type import run_in_the_background, run_on_startup, run_in_the_console
 
-
 # 注册程序退出回调
 # atexit.register大多时候是不会执行的，比如非正常crash（taskkill...），或通过os._exit()退出；
 # 想到的另外一个方法是创建一个独立的进程（非子进程），对这个程序的运行进行循环检测，比如通过pid判断它是否存活，
 # 可以使用 win32process.GetProcessVersion(pid:int) 进行检测，不存在的 pid 会返回 0；
 # atexit.register(configurator.record_pid, False)
 
+log = mylogger.default_loguru
+
 
 def main():
+    log.info('程序启动，当前系统操作系统: {}-{}'.format(platform.platform(), platform.architecture()))
+
     # 获取启动参数
     arg_dict = args_definition.arg_dict
     # 创建程序快捷方式
@@ -30,11 +34,10 @@ def main():
         lnk_path = None if lnk_args == [] else lnk_args[0]
         args = ' '.join(lnk_args[1:])
         utils.create_shortcut(sys.argv[0], lnk_path, args)
-    # 程序没指定运行参数，退出
+    # 程序没指定运行参数，进入程序菜单
     if not arg_dict.get(args_definition.ARG_KEY_RUN):
         # os._exit(-1)
-        # 关闭日志
-        mylogger.user_none()
+        mylogger.use_file_logger()
         app_menu.main()
     else:
         # 首先确定运行日志记录方式

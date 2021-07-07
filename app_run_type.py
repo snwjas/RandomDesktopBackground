@@ -58,6 +58,7 @@ def run_in_the_background(log_type: str = None):
     if not succeed:
         utils.create_dialog("后台启动程序失败:\n\n{}".format(msg),
                             const_config.dialog_title, style=win32con.MB_ICONWARNING)
+    return succeed
 
     # run_in_the_console()
     # ct = win32api.GetConsoleTitle()
@@ -72,7 +73,7 @@ def run_on_startup(log_type: str = None):
     # 创建快捷方式到用户开机启动目录: shell:startup
     create_startup_lnk(log_type)
     # 后台运行
-    run_in_the_background(log_type)
+    return run_in_the_background(log_type)
 
 
 def create_startup_lnk(log_type: str = None):
@@ -85,4 +86,6 @@ def create_startup_lnk(log_type: str = None):
                                 args_definition.ARG_LOG, log_type if log_type else
                                 args_definition.ARG_LOG_TYPE_FILE,
                                 )
-    utils.create_shortcut(app_path, lnkname=startup_path, args=args, style=7)
+    if startup_path:
+        return utils.create_shortcut(app_path, lnkname=startup_path, args=args, style=7)
+    utils.create_dialog("设置开机自启失败", const_config.dialog_title, interval=5, style=win32con.MB_ICONWARNING)

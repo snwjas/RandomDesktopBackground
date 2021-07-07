@@ -142,7 +142,8 @@ class GetBackgroundTask(object):
                                               "请检查配置文件或系统代理服务器配置是否异常！\n\n"
                                               "点击[是/Yes]退出程序，点击[否/No]继续运行！",
                                               const_config.dialog_title,
-                                              style=win32con.MB_YESNO)
+                                              style=win32con.MB_YESNO,
+                                              block=True, interval=30)
                 if btn_val == win32con.IDYES:
                     os._exit(1)
                 else:

@@ -100,7 +100,7 @@ def create_shortcut(filename: str, lnkname: str = None, args: str = None, style:
         if os.path.isdir(lnkname):
             lnkname = os.path.join(lnkname, get_lnkname())
         else:
-            if lnkname.startswith('shell:'):
+            if lnkname.lower().startswith('shell:'):
                 spec_dir = get_special_folders(lnkname[6:])
                 if spec_dir:
                     lnkname = os.path.join(spec_dir, get_lnkname())
@@ -169,15 +169,21 @@ def run_in_background(runnable_target):
             pythoncom.CoUninitialize()
 
 
-def create_dialog(message: str, title: str, style: int = win32con.MB_OK, interval: float = 0, callback=None):
+def create_dialog(message: str, title: str, style: int = win32con.MB_OK,
+                  block: bool = None, interval: float = 0, callback=None):
     """
-    创建一个 Windows 对话框，可设置自动关闭和关闭时的回调函数
+    创建一个 Windows 对话框，支持同步异步和自动关闭
+
+    值得注意的是，对于多选一没有关闭/取消功能的对话框，是不会自动关闭的，
+    例如win32con.MB_YESNO、win32con.MB_ABORTRETRYIGNORE等等。
+
     :param message: 对话框消息内容
     :param title: 对话框标题
     :param style: 对话框类型
-    :param interval: 自动关闭秒数，少于等于0则不会自动关闭，意味着阻塞调用线程
+    :param block: 对话框是否阻塞调用线程，默认值取决于interval<=0，为Ture不会自动关闭，意味着阻塞调用线程
+    :param interval: 对话框自动关闭秒数
     :param callback: 对话框关闭时的回调函数，含一参数为对话框关闭结果(按下的按钮值)
-    :return: 当 interval 参数大于0时，无返回值(None)，小于等于0，对话框阻塞当前线程直到返回,值为按下的按钮值
+    :return: 当对话框为非阻塞时，无返回值(None)，否则，对话框阻塞当前线程直到返回,值为按下的按钮值
     """
 
     global __show_dialog_times
@@ -199,41 +205,43 @@ def create_dialog(message: str, title: str, style: int = win32con.MB_OK, interva
                     win32gui.SetForegroundWindow(hwnd)
                 finally:
                     return
-            times_retry -= times_retry
+            times_retry -= 1
 
-    def show():
+    def show(timer: threading.Timer):
         threading.Thread(target=set_active).start()
-        return win32api.MessageBox(0, message, title, style)
-
-    def show_then_auto_close(timer: threading.Timer):
-        res = show()
+        btn_val = win32api.MessageBox(0, message, title, style)
         if timer and timer.is_alive():
             timer.cancel()
-        cb(res)
+        cb(btn_val)
+        return btn_val
 
     def close():
         hwnd = win32gui.FindWindow(None, title)
         if hwnd:
-            # PostMessage 异步，SendMessage 同步
-            # win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
-            # win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
-            # win32gui.EndDialog(hwnd, None)
             try:
+                # PostMessage 异步，SendMessage 同步
+                # win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+                # win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+                # win32gui.EndDialog(hwnd, None)
                 # 需要注意的是倒数第二个参数，指定如何发送消息
                 # http://timgolden.me.uk/pywin32-docs/win32gui__SendMessageTimeout_meth.html
                 # https://blog.csdn.net/hellokandy/article/details/53408799
-                win32gui.SendMessageTimeout(hwnd, win32con.WM_CLOSE, 0, 0, win32con.SMTO_BLOCK, 1000)
+                # win32gui.SendMessageTimeout(hwnd, win32con.WM_CLOSE, 0, 0, win32con.SMTO_BLOCK, 1000)
+                win32gui.EndDialog(hwnd, win32con.IDCLOSE)
             except Exception as e:
                 log.error("对话框[{}]关闭错误：{}".format(title, e))
 
-    if interval <= 0:
-        res = show()
-        cb(res)
-        return res
-    else:
+    block = block if (block is not None) else interval <= 0
+
+    timer = None
+    if interval > 0:
         timer = threading.Timer(interval, close)
         timer.start()
-        threading.Thread(target=lambda: show_then_auto_close(timer)).start()
+
+    if block:
+        return show(timer)
+    else:
+        threading.Thread(target=lambda: show(timer)).start()
 
 
 def list_deduplication(li: list):

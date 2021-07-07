@@ -12,6 +12,7 @@ import sys
 import win32con
 import win32process
 
+import configurator
 import const_config
 import mylogger
 import utils
@@ -81,11 +82,12 @@ def __run_menu_1():
 
 def __run_menu_2():
     """ 在后台启动 """
-    if not __is_app_running():
-        run_in_the_background()
+    if not __is_app_running() and run_in_the_background():
         utils.create_dialog("程序已在后台启动...", const_config.dialog_title,
                             style=win32con.MB_OK, interval=5,
                             callback=lambda x: __print_menu())
+    else:
+        __print_menu()
 
 
 def __run_menu_3():
@@ -94,10 +96,11 @@ def __run_menu_3():
     if pid and win32process.GetProcessVersion(pid) > 0:
         create_startup_lnk()
     else:
-        run_on_startup()
-    utils.create_dialog('程序已后台启动，并设置开机自启', const_config.dialog_title,
-                        style=win32con.MB_OK, interval=5,
-                        callback=lambda x: __print_menu())
+        if run_on_startup():
+            utils.create_dialog('程序已后台启动，并设置开机自启',
+                                const_config.dialog_title,
+                                style=win32con.MB_OK, interval=5,
+                                callback=lambda x: __print_menu())
 
 
 def __run_menu_4():
@@ -148,10 +151,11 @@ def __run_menu_7():
     print(end='\n\n')
     __print_title()
     print()
-    print('{}版本：1.2021.06.25'.format(_left), end='\n\n')
-    print('{}作者：Myles Yang'.format(_left), end='\n\n')
-    print('{}GitHub：https://github.com/snwjas/RandomDesktopBackground'.format(_left), end='\n\n')
-    print('{}Gitee：https://gitee.com/snwjas/random-desktop-background'.format(_left), end='\n\n')
+    config = configurator.get_default_config()
+    print('{}版本：{}'.format(_left, config.get('App', 'version')), end='\n\n')
+    print('{}作者：{}'.format(_left, config.get('App', 'author')), end='\n\n')
+    print('{}GitHub：{}'.format(_left, config.get('App', 'github')), end='\n\n')
+    print('{}Gitee：{}'.format(_left, config.get('App', 'gitee')), end='\n\n')
     input('\n{}按任意键返回菜单...'.format(_left))
     return __print_menu()
 

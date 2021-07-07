@@ -11,7 +11,7 @@ import configurator
 import const_config
 import mylogger
 import utils
-from tesk_timer import SimpleTaskTimer
+from task_timer import SimpleTaskTimer
 from utils import is_background_valid
 
 user32 = ctypes.windll.user32
