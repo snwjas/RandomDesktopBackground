@@ -54,7 +54,7 @@ def run_in_the_background(log_type: str = None):
                                  args_definition.ARG_LOG, log_type if log_type else args_definition.ARG_LOG_TYPE_FILE
                                  )
 
-    succeed, msg = utils.run_in_background(app_path + args)
+    succeed, msg = utils.run_in_background(app_path, args)
     if not succeed:
         utils.create_dialog("后台启动程序失败:\n\n{}".format(msg),
                             const_config.dialog_title, style=win32con.MB_ICONWARNING)

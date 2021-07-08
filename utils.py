@@ -151,7 +151,7 @@ def locate_path(path: str):
         os.popen('explorer /e,/select,{}'.format(path))
 
 
-def run_in_background(runnable_target):
+def run_in_background(executable_target: str, args: str = ''):
     """
     后台运行目标程序
     """
@@ -159,7 +159,8 @@ def run_in_background(runnable_target):
         pythoncom.CoInitialize()
     try:
         ws = win32com_client.Dispatch("WScript.Shell")
-        res = ws.Run(runnable_target, 0)
+        executable_cmd = '"{}"{}'.format(executable_target, args) if args else '"{}"'.format(executable_target)
+        res = ws.Run(executable_cmd, 0)
         return True, res
     except Exception as e:
         log.error("设置目标程序后台启动失败：{}".format(e))

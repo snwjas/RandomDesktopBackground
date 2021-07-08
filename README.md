@@ -125,10 +125,11 @@ categories = 111
 purity = 100
 sorting = random
 order = desc
+resolutions = 1920x1080,2560x1440
 
 [Task]
 ; 桌面背景轮换的时间间隔，单位秒
-seconds = 300
+seconds = 520
 ; 记录当前壁纸的在轮换壁纸列表中下标，无需修改。作用是程序下一次启动可以从该壁纸重新开始切换。
 current = 0
 ; 下载壁纸时的线程数量，它取值在0-32之间，设为0时取值为设备CPU核心数+4。建议不要作修改，使用的图源网站限流，并发太高会导致壁纸下载失败。
@@ -136,7 +137,7 @@ threads = 2
 ; 下载每张壁纸前的随机暂停时间，随机值在两数之间，两个参数以半角逗号分割，参数可以是小数。它同样是控制下载频率的参数，以提高下载成功率，不建议修改。
 rndsleep = 0.0,5.0
 ; 是否保存旧的壁纸，取值为真或假，具体解析请看上面对工作目录下文件夹wallpapers的解析。
-retainbgs = 1
+retainbgs = 0
 
 ; 热键设置说明：只能是特定小写字符，每个按键间以 + 分割。最多支持3个修饰键(ctrl、shift、alt和win)和一个普通键。按键对应的可取字符值会在下文给出。
 ; 注意：设置单一的一个键作为热键可能会使原有的按键功能失效，所以慎重采取这样的设置。
@@ -224,3 +225,5 @@ hk_locate = control+alt+up
 蓝奏云：https://lanzoui.com/b00umf2ej （密码：rdb）
 
 天翼云：https://cloud.189.cn/web/share?code=nENBJvIZZnEv （访问码：05mb）
+
+Git：[Gitee Releases](https://gitee.com/snwjas/random-desktop-background/releases)  |  [Github Releases](https://github.com/snwjas/RandomDesktopBackground/releases)
