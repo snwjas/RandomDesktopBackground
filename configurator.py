@@ -16,7 +16,7 @@ import win32con
 import const_config
 import mylogger
 import utils
-from utils import create_dialog
+from utils import create_dialog_w
 
 log = mylogger.default_loguru
 
@@ -54,8 +54,8 @@ def parse_config():
     res = config.read([os.path.join(config_srcpath, 'config.ini')])
     if not res:
         # http://timgolden.me.uk/pywin32-docs/win32api__MessageBox_meth.html
-        btn_val = create_dialog("配置文件丢失，是否使用默认配置启动？", const_config.dialog_title,
-                                style=win32con.MB_YESNO)
+        btn_val = create_dialog_w("配置文件丢失，是否使用默认配置启动？", const_config.dialog_title,
+                                  style=win32con.MB_YESNO)
         if btn_val != win32con.IDYES:
             os._exit(1)
 
@@ -65,8 +65,8 @@ def parse_config():
     else:
         if not config.has_option('Api', 'url') and \
                 not (config.has_section('Params') and not config.items('Params')):
-            btn_val = create_dialog("配置文件未指定请求URL或参数，是否使用默认配置启动？", const_config.dialog_title,
-                                    style=win32con.MB_YESNO)
+            btn_val = create_dialog_w("配置文件未指定请求URL或参数，是否使用默认配置启动？", const_config.dialog_title,
+                                      style=win32con.MB_YESNO)
             if btn_val != win32con.IDYES:
                 os._exit(1)
 

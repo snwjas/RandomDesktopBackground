@@ -138,8 +138,8 @@ class SetBackgroundTask(object):
             return
 
         if (not self.__bg_paths) or self.__current <= 0:
-            utils.create_dialog("已是第一个桌面背景了，不能再切换上一个", const_config.dialog_title,
-                                interval=5, style=win32con.MB_ICONWARNING)
+            utils.create_dialog_w("已是第一个桌面背景了，不能再切换上一个", const_config.dialog_title,
+                                  interval=5, style=win32con.MB_ICONWARNING)
             return
         pre = self.__current - 1
         while pre >= 0:
@@ -252,7 +252,7 @@ class SetBackgroundTask(object):
             self.__hotkey = None
         elif bind_succeed_count < bind_count:
             # 设置非阻塞自动关闭对话框，防止阻塞线程
-            utils.create_dialog(bind_error_msg, const_config.dialog_title, style=win32con.MB_ICONWARNING, interval=7)
+            utils.create_dialog_w(bind_error_msg, const_config.dialog_title, style=win32con.MB_ICONWARNING, interval=7)
 
     def unbind_hotkey(self):
         """

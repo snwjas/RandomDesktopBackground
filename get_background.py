@@ -76,8 +76,8 @@ class GetBackgroundTask(object):
 
         if self.taskCount > 0:
             log.info('后台正在拉取壁纸...请等待任务完成在执行此操作！')
-            utils.create_dialog('后台正在拉取壁纸...\n\n请等待任务完成在执行此操作!', const_config.dialog_title,
-                                interval=5, style=win32con.MB_ICONWARNING)
+            utils.create_dialog_w('后台正在拉取壁纸...\n\n请等待任务完成在执行此操作!', const_config.dialog_title,
+                                  interval=5, style=win32con.MB_ICONWARNING)
             return False
 
         log.info('正在拉取新的随机壁纸...')
@@ -138,12 +138,12 @@ class GetBackgroundTask(object):
         if not bg_url_list:
             self.get_random_bg_urls_failures += 1
             if self.get_random_bg_urls_failures > _get_random_bg_urls_max_failures:
-                btn_val = utils.create_dialog("拉取壁纸列表多次失败，将无法正常切换桌面背景！\n\n"
-                                              "请检查配置文件或系统代理服务器配置是否异常！\n\n"
-                                              "点击[是/Yes]退出程序，点击[否/No]继续运行！",
-                                              const_config.dialog_title,
-                                              style=win32con.MB_YESNO,
-                                              block=True, interval=30)
+                btn_val = utils.create_dialog_w("拉取壁纸列表多次失败，将无法正常切换桌面背景！\n\n"
+                                                "请检查配置文件或系统代理服务器配置是否异常！\n\n"
+                                                "点击[是/Yes]退出程序，点击[否/No]继续运行！",
+                                                const_config.dialog_title,
+                                                style=win32con.MB_YESNO,
+                                                block=True, interval=30)
                 if btn_val == win32con.IDYES:
                     os._exit(1)
                 else:

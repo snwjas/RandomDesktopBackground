@@ -56,8 +56,8 @@ def run_in_the_background(log_type: str = None):
 
     succeed, msg = utils.run_in_background(app_path, args)
     if not succeed:
-        utils.create_dialog("后台启动程序失败:\n\n{}".format(msg),
-                            const_config.dialog_title, style=win32con.MB_ICONWARNING)
+        utils.create_dialog_w("后台启动程序失败:\n\n{}".format(msg),
+                              const_config.dialog_title, style=win32con.MB_ICONWARNING)
     return succeed
 
     # run_in_the_console()
@@ -88,4 +88,4 @@ def create_startup_lnk(log_type: str = None):
                                 )
     if startup_path:
         return utils.create_shortcut(app_path, lnkname=startup_path, args=args, style=7)
-    utils.create_dialog("设置开机自启失败", const_config.dialog_title, interval=5, style=win32con.MB_ICONWARNING)
+    utils.create_dialog_w("设置开机自启失败", const_config.dialog_title, interval=5, style=win32con.MB_ICONWARNING)

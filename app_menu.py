@@ -83,11 +83,9 @@ def __run_menu_1():
 def __run_menu_2():
     """ 在后台启动 """
     if not __is_app_running() and run_in_the_background():
-        utils.create_dialog("程序已在后台启动...", const_config.dialog_title,
-                            style=win32con.MB_OK, interval=5,
-                            callback=lambda x: __print_menu())
-    else:
-        __print_menu()
+        utils.create_dialog_w("程序已在后台启动...", const_config.dialog_title,
+                              style=win32con.MB_OK, interval=5,
+                              callback=lambda x: __print_menu())
 
 
 def __run_menu_3():
@@ -97,10 +95,10 @@ def __run_menu_3():
         create_startup_lnk()
     else:
         if run_on_startup():
-            utils.create_dialog('程序已后台启动，并设置开机自启',
-                                const_config.dialog_title,
-                                style=win32con.MB_OK, interval=5,
-                                callback=lambda x: __print_menu())
+            utils.create_dialog_w('程序已后台启动，并设置开机自启',
+                                  const_config.dialog_title,
+                                  style=win32con.MB_OK, interval=5,
+                                  callback=lambda x: __print_menu())
 
 
 def __run_menu_4():
@@ -118,9 +116,9 @@ def __run_menu_4():
         msg = '已取消开机自启！'
     else:
         msg = '未设置开机自启！'
-    utils.create_dialog(msg, const_config.dialog_title,
-                        style=win32con.MB_OK, interval=5,
-                        callback=lambda x: __print_menu())
+    utils.create_dialog_w(msg, const_config.dialog_title,
+                          style=win32con.MB_OK, interval=5,
+                          callback=lambda x: __print_menu())
 
 
 def __run_menu_5():
@@ -132,9 +130,9 @@ def __run_menu_5():
         msg = '已结束程序的运行！'
     else:
         msg = '程序没有在运行！'
-    utils.create_dialog(msg, const_config.dialog_title,
-                        style=win32con.MB_OK, interval=5,
-                        callback=lambda x: __print_menu())
+    utils.create_dialog_w(msg, const_config.dialog_title,
+                          style=win32con.MB_OK, interval=5,
+                          callback=lambda x: __print_menu())
 
 
 def __run_menu_6():
@@ -168,9 +166,9 @@ def __is_app_running():
     pid = get_pid_from_file()
     # 程序在运行中
     if pid and win32process.GetProcessVersion(pid) > 0:
-        utils.create_dialog("程序运行中，请勿重复运行！", const_config.dialog_title,
-                            style=win32con.MB_ICONWARNING, interval=5,
-                            callback=lambda x: __print_menu())
+        utils.create_dialog_w("程序运行中，请勿重复运行！", const_config.dialog_title,
+                              style=win32con.MB_ICONWARNING, interval=5,
+                              callback=lambda x: __print_menu())
         return True
     return False
 

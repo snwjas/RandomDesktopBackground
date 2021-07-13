@@ -5,6 +5,7 @@
 
 @author Myles Yang
 """
+import ctypes
 import imghdr
 import os
 import re
@@ -18,6 +19,8 @@ import win32con
 import win32gui
 
 import mylogger
+
+user32 = ctypes.windll.user32
 
 log = mylogger.default_loguru
 
@@ -170,17 +173,41 @@ def run_in_background(executable_target: str, args: str = ''):
             pythoncom.CoUninitialize()
 
 
+def set_foreground_window(target):
+    """
+    设置 windows 窗口处于前台
+
+    :param target: 窗口句柄或窗口标题
+    :return:
+    """
+    if not target:
+        return
+
+    times_retry = 10
+    while times_retry > 0:
+        time.sleep(0.1)
+        hwnd = None
+        if isinstance(target, str):
+            hwnd = win32gui.FindWindow(None, target)
+        if hwnd and isinstance(target, int):
+            try:
+                win32gui.SetForegroundWindow(hwnd)
+            finally:
+                return
+        times_retry -= 1
+
+
 def create_dialog(message: str, title: str, style: int = win32con.MB_OK,
                   block: bool = None, interval: float = 0, callback=None):
     """
     创建一个 Windows 对话框，支持同步异步和自动关闭
 
-    值得注意的是，对于多选一没有关闭/取消功能的对话框，是不会自动关闭的，
+    值得注意的是，对于多选一没有关闭/取消功能的对话框，自动关闭时默认(回调)返回值为 32000，
     例如win32con.MB_YESNO、win32con.MB_ABORTRETRYIGNORE等等。
 
     :param message: 对话框消息内容
     :param title: 对话框标题
-    :param style: 对话框类型
+    :param style: 对话框类型，该值可以相加组合出不同的效果。
     :param block: 对话框是否阻塞调用线程，默认值取决于interval<=0，为Ture不会自动关闭，意味着阻塞调用线程
     :param interval: 对话框自动关闭秒数
     :param callback: 对话框关闭时的回调函数，含一参数为对话框关闭结果(按下的按钮值)
@@ -192,43 +219,26 @@ def create_dialog(message: str, title: str, style: int = win32con.MB_OK,
 
     title = '{} [{}]'.format(title, __show_dialog_times)
 
-    def cb(res):
-        if callback and callable(callback):
-            callback(res)
-
-    def set_active():
-        times_retry = 10
-        while times_retry > 0:
-            time.sleep(0.1)
-            hwnd = win32gui.FindWindow(None, title)
-            if hwnd:
-                try:
-                    win32gui.SetForegroundWindow(hwnd)
-                finally:
-                    return
-            times_retry -= 1
-
     def show(timer: threading.Timer):
-        threading.Thread(target=set_active).start()
-        btn_val = win32api.MessageBox(0, message, title, style)
+        btn_val = win32api.MessageBox(0, message, title, style | win32con.MB_SETFOREGROUND)
         if timer and timer.is_alive():
             timer.cancel()
-        cb(btn_val)
+        if callback and callable(callback):
+            callback(btn_val)
         return btn_val
 
     def close():
         hwnd = win32gui.FindWindow(None, title)
         if hwnd:
             try:
-                # PostMessage 异步，SendMessage 同步
+                # 关闭对话框的一些方法：PostMessage 异步，SendMessage 同步
                 # win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
                 # win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
                 # win32gui.EndDialog(hwnd, None)
                 # 需要注意的是倒数第二个参数，指定如何发送消息
                 # http://timgolden.me.uk/pywin32-docs/win32gui__SendMessageTimeout_meth.html
-                # https://blog.csdn.net/hellokandy/article/details/53408799
                 # win32gui.SendMessageTimeout(hwnd, win32con.WM_CLOSE, 0, 0, win32con.SMTO_BLOCK, 1000)
-                win32gui.EndDialog(hwnd, win32con.IDCLOSE)
+                win32gui.EndDialog(hwnd, 32000)
             except Exception as e:
                 log.error("对话框[{}]关闭错误：{}".format(title, e))
 
@@ -243,6 +253,35 @@ def create_dialog(message: str, title: str, style: int = win32con.MB_OK,
         return show(timer)
     else:
         threading.Thread(target=lambda: show(timer)).start()
+
+
+def create_dialog_w(message: str, title: str, style: int = win32con.MB_OK,
+                    block: bool = None, interval: float = 0, callback=None):
+    """
+    使用微软未公布的Windows API: MessageBoxTimeout 实现自动关闭的对话框，通过user32.dll调用，
+    相比于使用 MessageBox 来实现显得更加简洁，参数详情请参考以上函数 create_dialog
+
+    调用时 style 请不要 与 上 MB_SETFOREGROUND
+
+    值得注意的是 Windows 2000 没有导出该函数。并且对于多选一没有关闭/取消功能的对话框，
+    自动关闭时默认(回调)返回值为 32000
+    """
+
+    def show():
+        # if UNICODE MessageBoxTimeoutW else MessageBoxTimeoutA
+        # MessageBoxTimeout(hwnd, lpText, lpCaption, uType, wLanguageId, dwMilliseconds)
+        btn_val = user32.MessageBoxTimeoutW(0, message, title, style | win32con.MB_SETFOREGROUND, 0, interval)
+        if callback and callable(callback):
+            callback(btn_val)
+        return btn_val
+
+    block = block if (block is not None) else interval <= 0
+    interval = int(interval * 1000) if interval > 0 else 0
+
+    if block:
+        return show()
+    else:
+        threading.Thread(target=show).start()
 
 
 def list_deduplication(li: list):
